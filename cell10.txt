@@ -1,0 +1,38 @@
+# ============================================================
+# 3.11 ── Redshift Distribution – The Most Discriminative Feature
+# ============================================================
+
+fig, axes = plt.subplots(1, 2, figsize=(16, 5))
+
+# KDE plot of redshift by class
+for cls, color in zip(['GALAXY', 'QSO', 'STAR'], colors):
+    subset = train_df[train_df['class'] == cls]['redshift']
+    axes[0].hist(subset, bins=80, alpha=0.5, label=cls, color=color, density=True)
+    subset.plot.kde(ax=axes[0], color=color, linewidth=2)
+
+axes[0].set_title('Redshift Distribution by Class (KDE + Histogram)', fontsize=13, fontweight='bold')
+axes[0].set_xlabel('Redshift', fontsize=11)
+axes[0].set_ylabel('Density', fontsize=11)
+axes[0].legend(fontsize=10)
+axes[0].set_xlim(-0.5, 4)
+
+# Violin plot
+parts = axes[1].violinplot(
+    [train_df[train_df['class'] == cls]['redshift'].values for cls in ['GALAXY', 'QSO', 'STAR']],
+    positions=[1, 2, 3], showmeans=True, showmedians=True
+)
+for idx, pc in enumerate(parts['bodies']):
+    pc.set_facecolor(colors[idx])
+    pc.set_alpha(0.6)
+axes[1].set_xticks([1, 2, 3])
+axes[1].set_xticklabels(['GALAXY', 'QSO', 'STAR'])
+axes[1].set_title('Redshift Violin Plot by Class', fontsize=13, fontweight='bold')
+axes[1].set_xlabel('Class', fontsize=11)
+axes[1].set_ylabel('Redshift', fontsize=11)
+
+plt.tight_layout()
+plt.savefig('../notebooks/redshift_analysis.png', dpi=150, bbox_inches='tight')
+plt.show()
+
+print("\n📊 Redshift Statistics by Class:")
+display(train_df.groupby('class')['redshift'].describe().round(4))
